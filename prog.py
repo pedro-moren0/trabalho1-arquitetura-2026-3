@@ -1,6 +1,18 @@
 from math import log10
 from random import shuffle
+from abc import ABC, abstractmethod
 
+class Key(ABC):
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    
+    @abstractmethod
+    def decrypt(self, text):
+        """Decrypts an encrypted text"""
+class SubstitutionKey(Key):
+    def __init__(self):
+        pass
+    def decrypt(self, text):
+        pass
 class Letter:
     def __init__(self, **kwargs):
         if "bin" in kwargs or "abs" in kwargs:
@@ -64,6 +76,13 @@ class Ngram:
         return score
 
 
+def letter_relpos(letter):
+    ascii_num = ord(letter)
+    if ascii_num >= 65 and ascii_num < 91:
+        return ascii_num - 65
+    else:
+        return None
+
 def parse(file):
     with open(file) as f:
         raw = f.read()
@@ -77,12 +96,13 @@ def letters_to_str(ls):
 def decrypt(letters, key):
     return [Letter(abs=key[l.relpos].ascii) if l.relpos else l for l in letters]
 
-alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 circ = "encoded-simple.txt"
 cyphertext, ct_chars = parse(circ)
 quadgram_file = Ngram(4)
 quadgram_file.from_file("english_quadgrams.txt")
 
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 key = list(map(lambda x: Letter(abs=ord(x)), alphabet))
 shuffle(key)
 score = quadgram_file.score(letters_to_str(decrypt(ct_chars, key)))
